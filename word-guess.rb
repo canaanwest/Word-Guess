@@ -21,7 +21,6 @@ class ASCII_display
 end #End of ASCII_display class
 
 
-
 class Game
   attr_reader :word, :word_bank, :word_array, :letters, :bad_attempts, :picture, :update_letters
   def initialize
@@ -33,7 +32,7 @@ class Game
     @picture = ASCII_display.new #SOME ASCII art as an arg
   end
 
-#works!
+#WORKS!
   def put_spaces(word)
     spaces = []
     word.length.times do |space|
@@ -41,16 +40,35 @@ class Game
     end
     return spaces.join(" ")
   end
+  
+#WORKS
+  def update_bad_attempts(guess)
+    @bad_attempts.push(guess)
+    @picture.update_ASCII_display
 
+    if @bad_attempts.length == 2 #we can change default later
+      puts "You LOSE. #{@word} was the word."
+      exit
+    else
+      # user_guesses
+      puts "keep going"
+    end
+  end
 
-#will only excute when guess is correct
 #WORKS!
   def update_letters(guess)
+    flag = false
     @word_array.each_index do |index|
       if @word_array[index] == guess
         @letters[index*2] = guess
+        flag = true
       end
     end
+      if flag == false
+        puts "You guessed wrong, sucker!"
+        update_bad_attempts(guess)
+      end
+
     return @letters
   end
 
@@ -67,25 +85,18 @@ end
 game1 = Game.new
 puts game1.letters
 puts game1.update_letters("o")
-puts game1.update_picture
-puts game1.update_picture
+puts game1.update_letters("z")
+puts game1.update_letters("l")
+puts game1.update_letters("a")
+puts "#{game1.bad_attempts}"
+# puts game1.update_picture
+# puts game1.update_picture
 
 
 
 #puts game1.picture.update_ASCII_display
 
 #
-#
-#   def update_bad_attempts(guess)
-#     @bad_attempts.push(guess)
-#
-#     if @bad_attempts.length == 6 #we can change default later
-#       puts "You LOSE. #{@word} was the word."
-#       exit
-#     else
-#       user_guesses
-#     end
-#   end
 #
 #
 # end
