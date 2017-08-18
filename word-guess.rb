@@ -10,7 +10,6 @@ class ASCII_display
     #store picture as an array
   end
 
-
   def display_picture(picture)
     picture.each do |line|
       puts "#{line} \n"
@@ -98,6 +97,53 @@ end
 
 
 
+def valid_guess(guess, game)
+  while guess == guess.to_i.to_s
+    puts "Please enter a letter or a word."
+    guess = gets.chomp.downcase
+  end
+  while game.attempts.include?(guess)
+    puts "You already guessed that! Try again!"
+    guess = gets.chomp.downcase
+  end
+  return guess
+end
+
+def user_guesses(game)
+  # puts game.letters
+  puts "Pick a letter!!"
+  guess = gets.chomp.downcase
+  guess = valid_guess(guess, game)
+  return guess
+end
+
+
+
+def check(game, guess) ### check for when user inputs same letter
+  game.update_letters(guess) # method that we will define later
+end
+
+def win?(game)
+  game.letters.split(" ").join("") == game.word
+end
+
+
+
+
+#INTERFACE!!!!
+game1 = Game.new
+
+puts game1.letters
+until win?(game1)
+  check(game1, user_guesses(game1))
+end
+
+puts "You won!!! The word was #{game1.word}\n"
+
+##Figure out where the letters are being displayed each time within the code--we want it to display below the picture
+##Figure out if there's a way to change the color
+
+
 # game1 = Game.new
 # puts game1.letters
 # puts game1.update_letters("o")
@@ -115,43 +161,3 @@ end
 #
 # #~~~~~~~~~~
 #
-game1 = Game.new
-
-def user_guesses(game)
-  # puts game.letters
-  puts "Pick a letter!!"
-  guess = gets.chomp.downcase
-  while guess == guess.to_i.to_s
-      puts "Please enter a letter or a word."
-    guess = gets.chomp.downcase
-  end
-  while game.attempts.include?(guess)
-    puts "You already guessed that! Try again!"
-    guess = gets.chomp.downcase
-  end
-  return guess
-end
-
-
-def check(game, guess) ### check for when user inputs same letter
-  game.update_letters(guess) # method that we will define later
-end
-
-def win?(game)
-  game.letters.split(" ").join("") == game.word
-end
-
-
-
-
-#INTERFACE!!!!
-puts game1.letters
-
-until win?(game1)
-  check(game1, user_guesses(game1))
-end
-
-puts "You won!!! The word was #{game1.word}\n"
-
-##Figure out where the letters are being displayed each time within the code--we want it to display below the picture
-##Figure out if there's a way to change the color
