@@ -2,10 +2,9 @@ require "pry"
 require "colorize"
 
 class ASCII_display
-  attr_reader :ASCII_init, :displayed, :turns
+  attr_reader :ASCII_init, :displayed
   def initialize
     @ASCII_init = ["  @ . . @".colorize(:green), "  ( --- )".colorize(:green), " (  >__<  )".colorize(:green), " ^^  ~~  ^^".colorize(:green), " ~~~~~~~~~~~".colorize(:green), "  ~~~~~~~~~".colorize(:green)]
-    @turns = @ASCII_init.length
     @displayed = display_picture(@ASCII_init)
     #store picture as an array
   end
@@ -21,11 +20,10 @@ class ASCII_display
   end
 end #End of ASCII_display class
 
-
 class Game
   attr_reader :word, :word_bank, :word_array, :letters, :attempts, :picture, :update_letters
   def initialize
-    @word_bank= ["hello", "word"]
+    @word_bank= ["hello", "word"] #want to use faker for this
     @word= @word_bank.sample
     @word_array = @word.split("")
     @letters = put_spaces(@word)
@@ -118,17 +116,13 @@ def user_guesses(game)
 end
 
 
-
-def check(game, guess) ### check for when user inputs same letter
-  game.update_letters(guess) # method that we will define later
+def check(game, guess)
+  game.update_letters(guess)
 end
 
 def win?(game)
   game.letters.split(" ").join("") == game.word
 end
-
-
-
 
 #INTERFACE!!!!
 game1 = Game.new
