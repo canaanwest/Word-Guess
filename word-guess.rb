@@ -1,12 +1,15 @@
 require "pry"
+require "colorize"
 
 class ASCII_display
-  attr_reader :ASCII_init, :displayed
+  attr_reader :ASCII_init, :displayed, :turns
   def initialize
-    @ASCII_init = ["///", "////", "/////"]
+    @ASCII_init = ["  @ . . @".colorize(:green), "  ( --- )".colorize(:green), " (  >__<  )".colorize(:green), " ^^  ~~  ^^".colorize(:green), " ~~~~~~~~~~~".colorize(:green), "  ~~~~~~~~~".colorize(:green)]
+    @turns = @ASCII_init.length
     @displayed = display_picture(@ASCII_init)
     #store picture as an array
   end
+
 
   def display_picture(picture)
     picture.each do |line|
@@ -15,8 +18,7 @@ class ASCII_display
   end
 
   def update_ASCII_display
-    @ASCII_init.delete(@ASCII_init[0])
-    return display_picture(@ASCII_init)
+    return @ASCII_init.delete(@ASCII_init[-1])
   end
 end #End of ASCII_display class
 
@@ -40,13 +42,13 @@ class Game
     end
     return spaces.join(" ")
   end
-  
+
 #WORKS
   def update_bad_attempts(guess)
     @bad_attempts.push(guess)
     @picture.update_ASCII_display
 
-    if @bad_attempts.length == 2 #we can change default later
+    if @bad_attempts.length == @picture.turns #we can change default later
       puts "You LOSE. #{@word} was the word."
       exit
     else
@@ -58,18 +60,23 @@ class Game
 #WORKS!
   def update_letters(guess)
     flag = false
+
     @word_array.each_index do |index|
       if @word_array[index] == guess
         @letters[index*2] = guess
         flag = true
       end
     end
+
       if flag == false
         puts "You guessed wrong, sucker!"
         update_bad_attempts(guess)
       end
 
-    return @letters
+    # return @letters
+    puts @picture.displayed
+    puts @letters
+    puts "You've guessed: #{@bad_attempts}"
   end
 
 
@@ -82,28 +89,16 @@ end
 
 
 
-game1 = Game.new
-puts game1.letters
-puts game1.update_letters("o")
-puts game1.update_letters("z")
-puts game1.update_letters("l")
-puts game1.update_letters("a")
-puts "#{game1.bad_attempts}"
+# game1 = Game.new
+# puts game1.letters
+# puts game1.update_letters("o")
+# puts game1.update_letters("z")
+# puts game1.update_letters("l")
+# puts game1.update_letters("a")
+# puts "#{game1.bad_attempts}"
 # puts game1.update_picture
 # puts game1.update_picture
 
-
-
-#puts game1.picture.update_ASCII_display
-
-#
-#
-#
-# end
-#
-#
-#
-#
 
 
 
@@ -111,23 +106,35 @@ puts "#{game1.bad_attempts}"
 #
 # #~~~~~~~~~~
 #
-# game1 = Game.new
-#
-# def user_guesses
-#   puts "Pick a letter!!"
-#   guess = gets.chomp.downcase
-#   return guess
-# end
-#
-#
-# def check(guess)
-#   if game1.word.include?(guess) # does it need to be able to read the word?
-#     game1.update_letters # method that we will define later
-#   else
-#     game1.update_picture
-#     game1.update_bad_attempts # method we will define later
-#   end
-# end
-#
-#
-# check(user_guesses)
+game1 = Game.new
+
+def user_guesses
+  # puts game.letters
+  puts "Pick a letter!!"
+  guess = gets.chomp.downcase
+  return guess
+end
+
+
+def check(game, guess) ### check for when user inputs same letter
+  game.update_letters(guess) # method that we will define later
+end
+
+def win?(game)
+  game.letters.split(" ").join("") == game.word
+end
+
+
+
+
+#INTERFACE!!!!
+puts game1.letters
+
+until win?(game1)
+  check(game1, user_guesses)
+end
+
+puts "You won!!! The word was #{game1.word}"
+
+##Figure out where the letters are being displayed each time within the code--we want it to display below the picture
+##Figure out if there's a way to change the color
