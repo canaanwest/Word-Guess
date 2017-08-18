@@ -24,17 +24,42 @@ end #End of ASCII_display class
 
 
 class Game
-  attr_reader :word, :word_bank, :word_array, :letters, :bad_attempts, :picture, :update_letters
+  attr_reader :word, :word_bank, :word_array, :letters, :attempts, :picture, :update_letters
   def initialize
     @word_bank= ["hello", "word"]
     @word= @word_bank.sample
     @word_array = @word.split("")
     @letters = put_spaces(@word)
-    @bad_attempts= []
+    @attempts= []
     @picture = ASCII_display.new #SOME ASCII art as an arg
   end
 
-#WORKS!
+  def update_letters(guess)
+    if guess.length > 1
+      guessed_word(guess)
+    end
+    flag = false
+      @word_array.each_index do |index|
+        if @word_array[index] == guess
+          @letters[index*2] = guess
+          flag = true
+          puts "\n\nGood job! You got one!"
+        end
+      end
+      if flag == false
+        puts "\nYou guessed wrong, sucker!"
+        @picture.update_ASCII_display
+      end
+
+    # return @letters
+    update_attempts(guess)
+    puts @picture.displayed
+    puts "#{@letters}\n\n"
+    puts "You've guessed: #{@attempts} \n"
+
+  end
+
+  private
   def put_spaces(word)
     spaces = []
     word.length.times do |space|
@@ -43,40 +68,24 @@ class Game
     return spaces.join(" ")
   end
 
-#WORKS
-  def update_bad_attempts(guess)
-    @bad_attempts.push(guess)
-    @picture.update_ASCII_display
-
-    if @bad_attempts.length == @picture.turns #we can change default later
-      puts "You LOSE. #{@word} was the word."
+  #WORKS
+  def update_attempts(guess)
+    @attempts.push(guess)
+    if @picture.ASCII_init.length == 0 #we can change default later
+      puts "\nYOU LOSE. #{@word} was the word."
       exit
     else
       # user_guesses
-      puts "keep going"
+      puts "keep going! \n\n"
     end
   end
 
-#WORKS!
-  def update_letters(guess)
-    flag = false
-
-    @word_array.each_index do |index|
-      if @word_array[index] == guess
-        @letters[index*2] = guess
-        flag = true
-      end
+  #WORKS!
+  def guessed_word(guess)
+    if guess == @word
+      puts "You win!"
+      exit
     end
-
-      if flag == false
-        puts "You guessed wrong, sucker!"
-        update_bad_attempts(guess)
-      end
-
-    # return @letters
-    puts @picture.displayed
-    puts @letters
-    puts "You've guessed: #{@bad_attempts}"
   end
 
 
@@ -95,7 +104,7 @@ end
 # puts game1.update_letters("z")
 # puts game1.update_letters("l")
 # puts game1.update_letters("a")
-# puts "#{game1.bad_attempts}"
+# puts "#{game1.attempts}"
 # puts game1.update_picture
 # puts game1.update_picture
 
@@ -108,10 +117,18 @@ end
 #
 game1 = Game.new
 
-def user_guesses
+def user_guesses(game)
   # puts game.letters
   puts "Pick a letter!!"
   guess = gets.chomp.downcase
+  while guess == guess.to_i.to_s
+      puts "Please enter a letter or a word."
+    guess = gets.chomp.downcase
+  end
+  while game.attempts.include?(guess)
+    puts "You already guessed that! Try again!"
+    guess = gets.chomp.downcase
+  end
   return guess
 end
 
@@ -131,10 +148,10 @@ end
 puts game1.letters
 
 until win?(game1)
-  check(game1, user_guesses)
+  check(game1, user_guesses(game1))
 end
 
-puts "You won!!! The word was #{game1.word}"
+puts "You won!!! The word was #{game1.word}\n"
 
 ##Figure out where the letters are being displayed each time within the code--we want it to display below the picture
 ##Figure out if there's a way to change the color
