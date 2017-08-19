@@ -1,5 +1,6 @@
 require "pry"
 require "colorize"
+require "faker"
 
 class ASCII_display
   attr_reader :ASCII_init, :displayed
@@ -21,14 +22,21 @@ class ASCII_display
 end #End of ASCII_display class
 
 class Game
-  attr_reader :word, :word_bank, :word_array, :letters, :attempts, :picture, :update_letters
+  attr_reader :word_array, :letters, :attempts, :picture, :update_letters, :category
+  attr_accessor :word
+
   def initialize
-    @word_bank= ["hello", "word"] #want to use faker for this
-    @word= @word_bank.sample
-    @word_array = @word.split("")
-    @letters = put_spaces(@word)
+
+    @category= {"color" => Faker::Color.color_name, "dessert" => Faker::Dessert.variety, "family guy" => Faker::FamilyGuy.character, "hipster" => Faker::Hipster.word}#want to use faker for this
+    @word= ""
     @attempts= []
     @picture = ASCII_display.new #SOME ASCII art as an arg
+  end
+
+  def make_word_array
+    @word.slice!(" ")
+    @word_array = @word.split("")
+    @letters = put_spaces(@word)
   end
 
   def update_letters(guess)
@@ -36,17 +44,17 @@ class Game
       guessed_word(guess)
     end
     flag = false
-      @word_array.each_index do |index|
-        if @word_array[index] == guess
-          @letters[index*2] = guess
-          flag = true
-          puts "\n\nGood job! You got one!"
-        end
+    @word_array.each_index do |index|
+      if @word_array[index] == guess
+        @letters[index*2] = guess
+        flag = true
+        puts "\n\nGood job! You got one!"
       end
-      if flag == false
-        puts "\nYou guessed wrong, sucker!"
-        @picture.update_ASCII_display
-      end
+    end
+    if flag == false
+      puts "\nYou guessed wrong, sucker!"
+      @picture.update_ASCII_display
+    end
 
     # return @letters
     update_attempts(guess)
@@ -69,7 +77,7 @@ class Game
   def update_attempts(guess)
     @attempts.push(guess)
     if @picture.ASCII_init.length == 0 #we can change default later
-      puts "\nYOU LOSE. #{@word} was the word."
+      puts "\nYOU LOSE.".red.blink + " #{@word} was the word.".red
       exit
     else
       # user_guesses
@@ -80,20 +88,16 @@ class Game
   #WORKS!
   def guessed_word(guess)
     if guess == @word
-      puts "You win!"
+      puts "YOU WIN!!".green.blink
       exit
     end
   end
-
-
 
   def update_picture
     return @picture.update_ASCII_display
   end
 
 end
-
-
 
 def valid_guess(guess, game)
   while guess == guess.to_i.to_s
@@ -109,12 +113,11 @@ end
 
 def user_guesses(game)
   # puts game.letters
-  puts "Pick a letter!!"
+  puts "Pick a letter, dash, or apostrophe."
   guess = gets.chomp.downcase
   guess = valid_guess(guess, game)
   return guess
 end
-
 
 def check(game, guess)
   game.update_letters(guess)
@@ -125,14 +128,23 @@ def win?(game)
 end
 
 #INTERFACE!!!!
+
 game1 = Game.new
+
+puts "Welcome to Word Guess! Your category choices are: \n"
+puts game1.category.keys
+puts "\nWhich category would you like?"
+user_category = gets.chomp.downcase
+game1.word = game1.category[user_category].downcase
+game1.make_word_array
+
 
 puts game1.letters
 until win?(game1)
   check(game1, user_guesses(game1))
 end
 
-puts "You won!!! The word was #{game1.word}\n"
+puts "You won!!! The word was #{game1.word}\n".green.blink
 
 ##Figure out where the letters are being displayed each time within the code--we want it to display below the picture
 ##Figure out if there's a way to change the color
