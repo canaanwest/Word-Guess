@@ -5,7 +5,7 @@ require "faker"
 class ASCII_display
   attr_reader :ASCII_init, :displayed
   def initialize
-    @ASCII_init = ["  @ . . @".colorize(:green), "  ( --- )".colorize(:green), " (  >__<  )".colorize(:green), " ^^  ~~  ^^".colorize(:green), " ~~~~~~~~~~~".colorize(:green), "  ~~~~~~~~~".colorize(:green)]
+    @ASCII_init = ["  @ . . @".green, "  ( --- )".green, " (  >__<  )".green, " ^^  ~~  ^^".green, " ~~~~~~~~~~~".green, "  ~~~~~~~~~".green]
     @displayed = display_picture(@ASCII_init)
     #store picture as an array
   end
@@ -39,6 +39,12 @@ class Game
     @letters = put_spaces(@word)
   end
 
+  def show_display
+    puts @picture.displayed
+    puts "#{@letters}\n\n"
+    puts "You've guessed: #{@attempts} \n"
+  end
+
   def update_letters(guess)
     if guess.length > 1
       guessed_word(guess)
@@ -58,9 +64,8 @@ class Game
 
     # return @letters
     update_attempts(guess)
-    puts @picture.displayed
-    puts "#{@letters}\n\n"
-    puts "You've guessed: #{@attempts} \n"
+    puts "\e[H\e[2J"
+    show_display
 
   end
 
@@ -92,13 +97,9 @@ class Game
       exit
     end
   end
+end #END game class
 
-  def update_picture
-    return @picture.update_ASCII_display
-  end
-
-end
-
+#USER
 def valid_guess(guess, game)
   while guess == guess.to_i.to_s
     puts "Please enter a letter or a word."
@@ -131,15 +132,17 @@ end
 
 game1 = Game.new
 
+
 puts "Welcome to Word Guess! Your category choices are: \n"
 puts game1.category.keys
 puts "\nWhich category would you like?"
 user_category = gets.chomp.downcase
+puts "\e[H\e[2J"
 game1.word = game1.category[user_category].downcase
 game1.make_word_array
 
 
-puts game1.letters
+game1.show_display
 until win?(game1)
   check(game1, user_guesses(game1))
 end
