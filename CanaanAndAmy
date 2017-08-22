@@ -1,0 +1,177 @@
+
+require "colorize"
+require "faker"
+
+class ASCII_display
+  attr_reader :ASCII_init, :displayed
+  def initialize
+    @ASCII_init = ["  @ . . @".green, "  ( --- )".green, " (  >__<  )".green, " ^^  ~~  ^^".green, " ~~~~~~~~~~~".green, "  ~~~~~~~~~".green]
+    @displayed = display_picture(@ASCII_init)
+  end
+
+  def display_picture(picture)
+    picture.each do |line|
+      puts "#{line} \n"
+    end
+  end
+
+  def update_ASCII_display
+    return @ASCII_init.delete(@ASCII_init[-1])
+  end
+end #End of ASCII_display class
+
+class Game
+  attr_reader :word_array, :status, :letters, :attempts, :picture, :right_or_wrong_guess, :category
+  attr_accessor :word, :chosen_category
+
+  def initialize
+    @category= {"color" => Faker::Color.color_name, "dessert" => Faker::Dessert.variety, "pokemon" => Faker::Pokemon.name,  "family guy" => Faker::FamilyGuy.character, "hipster" => Faker::Hipster.word}
+    @attempts= []
+    @picture = ASCII_display.new
+  end
+
+  def make_word_array
+    @word.slice!(" ")
+    @word_array = @word.split("")
+    @letters = put_spaces(@word)
+  end
+
+  def show_display
+    puts "[Category: #{@chosen_category.upcase}] \n\n"
+    puts @picture.displayed
+    puts "#{@letters}\n\n"
+    puts "You've guessed: #{@attempts} \n"
+  end
+
+  def status_update(guess)
+    @attempts.push(guess)
+    if @letters.split(" ").join("") == @word || guess == @word
+      @status = "win"
+    elsif @picture.ASCII_init.length == 0 #we can change default later
+      @status = "lose"
+    else
+      @status = "in progress"
+    end
+    return @status
+  end
+
+  #### AL optional reorganization below + colorize texts below####
+  def right_or_wrong_guess(guess)
+    flag = false
+    puts "\e[H\e[2J" #I like this edit
+
+    if guess == @word # new, special statement for if they guess the correct word
+      flag = true
+      puts "YOU GOT IT!".colorize(:color => :white, :background => :light_magenta)
+    elsif
+      @word_array.each_index do |index|
+        if @word_array[index] == guess
+          @letters[index*2] = guess
+          flag = true
+        end
+      end
+    end
+
+    if flag == false
+      puts "You guessed" + " wrong".red + ", sucker!"
+      @picture.update_ASCII_display
+    else
+      puts "Good job!".green + " You got one!"
+    end
+
+    status_update(guess)
+    show_display
+  end
+
+  private
+  def put_spaces(word)
+    spaces = []
+    word.length.times do |space|
+      spaces.push("_")
+    end
+    return spaces.join(" ")
+  end
+end # END GAME CLASS
+
+#USER
+def valid_guess(guess, game)
+  while guess == guess.to_i.to_s
+    puts "Please enter a letter or a word."
+    guess = gets.chomp.downcase
+  end
+  while game.attempts.include?(guess)
+    puts "You already guessed that! Try again!"
+    guess = gets.chomp.downcase
+  end
+  return guess
+end
+
+def valid_category(user_category, game)
+  until game.category.keys.include?(user_category)
+    puts "I'm sorry, that's not a valid category selection. Please choose one of the following categories: #{game.category.keys.join(", ")}"
+    user_category = gets.chomp.downcase
+  end
+  game.chosen_category = user_category
+  return user_category
+end
+
+def user_guesses(game)
+  puts "Pick a letter, dash, or apostrophe."
+  guess = gets.chomp.downcase
+  guess = valid_guess(guess, game)
+  return guess
+end
+
+def check(game, guess)
+  game.right_or_wrong_guess(guess)
+end
+
+def game_over?(status, game)
+  over = false
+  if status == "win"
+    puts "\n \u{1F438} \u{1F31F} \u{1F913}  YOU WIN! \u{1F913} \u{1F31F} \u{1F438}".green.blink
+    over = true
+    $winning_streak += 1 #if they win, it goes up by one
+  elsif status == "lose"
+    puts "\n \u{2620} YOU LOSE!\u{2620} ".red.blink + "\nThe word was: " + "#{game.word}".red + "\n"
+    over = true
+    $winning_streak = 0 #if they lose, it resets to 0
+  end
+  return over
+end
+
+#INTERFACE!!!!
+$winning_streak = 0 #starts off at 0
+continue = nil
+until continue == "no"
+  game1 = Game.new
+  puts "Welcome to Word Guess! Your category choices are: \n"
+  puts game1.category.keys
+
+  puts "\nWhich category would you like?"
+  user_category = gets.chomp.downcase
+  user_category = valid_category(user_category, game1)
+
+  puts "\e[H\e[2J"
+  game1.word = game1.category[user_category].downcase
+  game1.make_word_array
+  game1.show_display
+
+
+  until game_over?(game1.status, game1)
+    check(game1, user_guesses(game1))
+  end
+
+  puts "Your winning streak is: #{$winning_streak}\n".yellow #displays here just before asking to play again
+  puts "Would you like to play again? (yes/no)" #ask user if they want to continue
+  continue = gets.chomp.downcase
+
+  until continue == "yes" || continue == "no"
+    puts "Please select 'yes' or 'no'"
+    continue = gets.chomp.downcase
+  end
+
+  puts "\e[H\e[2J"
+end
+
+puts "\u{1F438} \u{1F438} \u{1F438}  Thanks for playing our word game! \u{1F438} \u{1F438} \u{1F438}"
